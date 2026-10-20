@@ -1,4 +1,5 @@
-# coolregex.fyi
+<!-- markdownlint-disable-next-line MD033 -->
+# <img src="docs/assets/logo.png" width="32" height="32" alt=""> coolregex.fyi
 
 [![CI](https://github.com/smeltery/coolregex/actions/workflows/ci.yml/badge.svg)](https://github.com/smeltery/coolregex/actions/workflows/ci.yml)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)
