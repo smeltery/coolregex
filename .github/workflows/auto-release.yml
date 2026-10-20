@@ -1,0 +1,51 @@
+name: auto-release
+on:
+  workflow_run:
+    workflows: [ci]
+    branches: [master]
+    types: [completed]
+permissions:
+  contents: write
+concurrency:
+  group: auto-release-master
+  cancel-in-progress: false
+jobs:
+  cut-release:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Tag tested commit and publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin master --tags
+          head="$(git rev-parse HEAD)"
+          if [ "$head" != "$(git rev-parse origin/master)" ]; then
+            echo "Skipping superseded CI run"
+            exit 0
+          fi
+          stable_tags() { grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true; }
+          tag="$(git tag --points-at "$head" | stable_tags | sort -V | tail -n 1)"
+          if [ -z "$tag" ]; then
+            latest="$(git tag --list | stable_tags | sort -V | tail -n 1)"
+            if [ -z "$latest" ]; then
+              tag=v0.1.0
+            else
+              tag="${latest%.*}.$(( ${latest##*.} + 1 ))"
+            fi
+            git tag "$tag" "$head"
+            git push origin "$tag"
+          fi
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --verify-tag --generate-notes --title "$tag"
+          fi

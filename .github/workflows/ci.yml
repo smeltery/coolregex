@@ -1,0 +1,27 @@
+name: ci
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: flox/install-flox-action@5bb9eaaffbeaa699a8251a1ae21ecf4c8e0e37d4 # v2
+        with:
+          version: 1.18.2
+      - name: Install dependencies
+        run: flox activate -- bun install --frozen-lockfile
+      - name: Install diagram browser
+        run: flox activate -- bun x puppeteer browsers install chrome --install-deps
+      - name: Validate source and documentation
+        run: flox activate -- bun run check
+      - name: Build production application
+        run: flox activate -- bun run build
