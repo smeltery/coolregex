@@ -26,7 +26,7 @@ pre-commit run --all-files
 
 The documentation check renders Mermaid diagrams using Chromium. Install its
 browser once with `bun x puppeteer browsers install chrome`; on Linux, install
-Chromium system dependencies as needed. CI installs both automatically.
+Chromium system dependencies as needed. CI downloads Chromium and uses the browser libraries supplied by its Ubuntu runner.
 Builds need network access to download the Google font used by `next/font`.
 
 To update dependencies, use `bun add` or `bun update` and commit `bun.lock`.

@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: flox activate -- bun install --frozen-lockfile
       - name: Install diagram browser
-        run: flox activate -- bun x puppeteer browsers install chrome --install-deps
+        run: flox activate -- bun x puppeteer browsers install chrome
       - name: Validate source and documentation
         run: flox activate -- bun run check
       - name: Build production application
